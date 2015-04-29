@@ -292,11 +292,14 @@ class OAuth2Validator(RequestValidator):
         # TODO check out a more reliable way to communicate expire time to oauthlib
         token['expires_in'] = oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
 
-    def validate_user(self, username, password, client, request, *args, **kwargs):
+    def validate_user(self, username, password, client, request, access_token=None, *args, **kwargs):
         """
         Check username and password correspond to a valid and active User
         """
+                
         u = authenticate(username=username, password=password)
+        if not u:
+            u = authenticate(username=username, access_token=access_token)
         if u is not None and u.is_active:
             request.user = u
             return True
